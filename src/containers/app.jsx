@@ -2,13 +2,13 @@ import React from 'react'
 import { Route, Redirect } from 'react-router'
 import { connect } from 'react-redux'
 import Login from './login'
-
-let Home = () => <div>hola soy el Home</div>
+import Home from './home'
+import Entretenimiento from './entretenimiento'
 
 const MatchWhenAuthorized = ({ component: Component, ...rest, auth }) => (
   <Route {...rest} render={renderProps => (
     auth ? (
-      <Component />
+      <Component route={renderProps} />
     ) : (
       <Redirect to={{
         pathname: '/login',
@@ -22,7 +22,14 @@ class App extends React.Component {
     super(props)
     console.log(this.props)
   }
-  render () {
+  renderLoader () {
+    return (
+      <div style={{background: '#000'}}>
+        <p>Cargando...</p>
+      </div>
+    )
+  }
+  renderRoutes () {
     return (
       <div>
         <Route exact path='/' render={() => (
@@ -34,8 +41,16 @@ class App extends React.Component {
         )} />
         <Route exact path='/login' component={Login} />
         <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/home' component={Home} />
+        <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/entretenimiento/:hotel' component={Entretenimiento} />
       </div>
     )
+  }
+  render () {
+    if (this.props.session.waiting) {
+      return this.renderLoader()
+    } else {
+      return this.renderRoutes()
+    }
   }
 }
 
