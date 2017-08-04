@@ -9,7 +9,7 @@ const Footer = () => {
           <br />
           <i className='fa fa-comment-o fa-2x' /> E-mail Contacto&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className='fa fa-mobile fa-2x' /> (998) 000 000
           <br />
-          <img src='images/logos/oasis-hotels-logo-gris.svg' alt='Oasis Hoteles Logotipo' />
+          <img src='/images/logos/oasis-hotels-logo-gris.svg' alt='Oasis Hoteles Logotipo' />
         </p>
       </div>
     </footer>

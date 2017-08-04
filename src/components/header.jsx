@@ -14,7 +14,7 @@ const Header = (props) => {
             <ul className='menuDropit'>
               <li>
                 <div className='avatar-profile'>
-                  <img src='images/avatar/avatar.png' alt='profile' />
+                  <img src='/images/avatar/avatar.png' alt='profile' />
                 </div>
                 <a href='#' className='name-profile'><span className='light'>Hola</span>,mi Nombre<i className='fa fa-caret-down' /></a>
                 <ul>

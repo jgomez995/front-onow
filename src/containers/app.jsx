@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import Login from './login'
 import Home from './home'
 import Entretenimiento from './entretenimiento'
+import CrearShow from './agregarShow'
 
 const MatchWhenAuthorized = ({ component: Component, ...rest, auth }) => (
   <Route {...rest} render={renderProps => (
@@ -42,6 +43,7 @@ class App extends React.Component {
         <Route exact path='/login' component={Login} />
         <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/home' component={Home} />
         <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/entretenimiento/:hotel' component={Entretenimiento} />
+        <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/agregarShow' component={CrearShow} />
       </div>
     )
   }
