@@ -34,7 +34,7 @@ class Entretenimiento extends React.Component {
         <div className='row'>
           <div className='col-xs-12'>
             <div className='return-button'>
-              <a href='home.html' className='btn btn-return'><span className='fa fa-angle-left fa-fw' /></a>
+              <a href='#' onClick={this.props.route.history.goBack} className='btn btn-return'><span className='fa fa-angle-left fa-fw' /></a>
               <h4>Hoteles</h4>
             </div>
           </div>
@@ -48,14 +48,13 @@ class Entretenimiento extends React.Component {
                   <li className='tab'><TabLink to='categorias' >Categorias</TabLink></li>
                   <li className='tab'><TabLink to='locaciones' >Locaciones</TabLink></li>
                 </ul>
-                
                 {/* </TabList> */}
                 {/* <PanelContainer> */}
                 <TabContent for='listado' >
                   <div id='listado'>
                     <h5 className='title'>Entretenimiento</h5>
                     <div className='add-promotion pull-right'>
-                      <a href='agregar-show.html' className='btn btn-success'><span className='fa fa-plus fa-fw' /></a>
+                      <a href={`/${this.props.route.match.params.hotel}/agregarshow`} className='btn btn-success'><span className='fa fa-plus fa-fw' /></a>
                     </div>
                     <table className='table tables' data-page-length='7'>
                       <thead>
