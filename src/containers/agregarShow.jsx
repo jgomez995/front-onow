@@ -9,7 +9,7 @@ const API_URL = 'http://localhost:8080/admin'
 var componentConfig = {
   iconFiletypes: ['.jpg', '.png', '.gif'],
   showFiletypeIcon: true,
-  postUrl: 'no-url',
+  postUrl: 'no-url'
 
 }
 var djsConfig = {
@@ -29,12 +29,6 @@ var djsConfig = {
   //   </div>
   // )
 }
-
-var eventHandlers = { addedfile: (file) => {
-  axios.post(`${API_URL}/upload/gallery`, {file})
-  .then(r => console.log(r))
-  .catch(e => console.log(e))
-} }
 
 class CrearShow extends React.Component {
   constructor(props) {
@@ -101,7 +95,21 @@ class CrearShow extends React.Component {
     e.preventDefault()
     console.log(this.state)
   }
+  handleFileAdded(file) {
+    axios.post(`${API_URL}/upload/gallery`, file, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+      .then(function (e) {
+        console.log(e)
+      })
+      .catch(function (e) {
+        console.log(e)
+      })
+  }
   component() {
+    let eventHandlers = { addedfile: this.handleFileAdded.bind(this) }
     return (
       <article className='main__body'>
         <form onSubmit={this.formSubmit}>
