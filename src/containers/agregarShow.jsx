@@ -41,7 +41,8 @@ class CrearShow extends React.Component {
       locacion: '',
       show: '',
       desc_en: '',
-      desc_es: ''
+      desc_es: '',
+      files: []
     }
     this.handleBackgroundChange = this.handleBackgroundChange.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
@@ -93,10 +94,18 @@ class CrearShow extends React.Component {
   }
   formSubmit(e) {
     e.preventDefault()
-    console.log(this.state)
-  }
-  handleFileAdded(file) {
-    axios.post(`${API_URL}/upload/gallery`, file, {
+    let form = new FormData()
+    let files = this.state.files
+    files.forEach((v, i) => {
+      form.append(`show-${i}`, v, v.name)
+    })
+    form.append('locacion', this.state.locacion)
+    form.append('show', this.state.show)
+    form.append('desc_es', this.state.desc_es)
+    form.append('desc_en', this.state.desc_en)
+    form.append('portada', this.state.portada, this.state.portada.name)
+   
+    axios.post(`${API_URL}/upload/gallery`, form, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -107,6 +116,12 @@ class CrearShow extends React.Component {
       .catch(function (e) {
         console.log(e)
       })
+    console.log(this.state)
+  }
+  handleFileAdded(file) {
+    let files = this.state.files
+    files.push(file) 
+    this.setState({files: files})
   }
   component() {
     let eventHandlers = { addedfile: this.handleFileAdded.bind(this) }
