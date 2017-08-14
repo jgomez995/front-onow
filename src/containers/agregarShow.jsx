@@ -25,7 +25,7 @@ var djsConfig = {
   //     <div className='dz-success-mark'><span>✔</span></div>
   //     <div className='dz-error-mark'><span>✘</span></div>
   //     <div className='dz-error-message'><span data-dz-errormessage='true' /></div>
-  //     <button className="btn btn-trash" data-dz-remove><i className="fa fa-trash fa-fw" /></button>
+  //     <button className='btn btn-trash' data-dz-remove><i className='fa fa-trash fa-fw' /></button>
   //   </div>
   // )
 }
@@ -104,8 +104,8 @@ class CrearShow extends React.Component {
     form.append('desc_es', this.state.desc_es)
     form.append('desc_en', this.state.desc_en)
     form.append('portada', this.state.portada, this.state.portada.name)
-   
-    axios.post(`${API_URL}/upload/gallery`, form, {
+
+    axios.post(`${API_URL}/newshow`, form, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -120,8 +120,8 @@ class CrearShow extends React.Component {
   }
   handleFileAdded(file) {
     let files = this.state.files
-    files.push(file) 
-    this.setState({files: files})
+    files.push(file)
+    this.setState({ files: files })
   }
   component() {
     let eventHandlers = { addedfile: this.handleFileAdded.bind(this) }
@@ -173,21 +173,21 @@ class CrearShow extends React.Component {
                   </div>
                 </div>
               </div>
-              <div className="row">
-                <div className="col-xs-12">
+              <div className='row'>
+                <div className='col-xs-12'>
                   <br />
-                  <div className="form-group">
-                    <label htmlFor="desc_es">Descripción Español:</label>
-                    <textarea name="desc_es" onChange={this.handleInputChange} value={this.state.desc_es} id="desc_es" cols="30" rows="10" className="editor"></textarea>
+                  <div className='form-group'>
+                    <label htmlFor='desc_es'>Descripción Español:</label>
+                    <textarea name='desc_es' onChange={this.handleInputChange} value={this.state.desc_es} id='desc_es' cols='30' rows='10' className='editor' />
                   </div>
                 </div>
               </div>
-              <div className="row">
-                <div className="col-xs-12">
+              <div className='row'>
+                <div className='col-xs-12'>
                   <br />
-                  <div className="form-group">
-                    <label htmlFor="desc_en">Descripción Inglés:</label>
-                    <textarea name="desc_en" onChange={this.handleInputChange} value={this.state.desc_en} id="desc_en" cols="30" rows="10" className="editor"></textarea>
+                  <div className='form-group'>
+                    <label htmlFor='desc_en'>Descripción Inglés:</label>
+                    <textarea name='desc_en' onChange={this.handleInputChange} value={this.state.desc_en} id='desc_en' cols='30' rows='10' className='editor' />
                   </div>
                 </div>
               </div>
@@ -204,6 +204,200 @@ class CrearShow extends React.Component {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div className='col-xs-12'>
+            <h5 className='title'>Dias Activos</h5>
+            <div className='row activeDays'>
+              <div className='col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Lunes' type='checkbox' data-target='#dayLunes' />
+                  <label htmlFor='option_Lunes'>Lunes</label>
+                </div>
+                <div className='row isDisabled' id='dayLunes'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Martes' type='checkbox' data-target='#dayMartes' />
+                  <label htmlFor='option_Martes'>Martes</label>
+                </div>
+                <div className='row isDisabled' id='dayMartes'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Miércoles' type='checkbox' data-target='#dayMiércoles' />
+                  <label htmlFor='option_Miércoles'>Miércoles</label>
+                </div>
+                <div className='row isDisabled' id='dayMiércoles'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Jueves' type='checkbox' data-target='#dayJueves' />
+                  <label htmlFor='option_Jueves'>Jueves</label>
+                </div>
+                <div className='row isDisabled' id='dayJueves'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Viernes' type='checkbox' data-target='#dayViernes' />
+                  <label htmlFor='option_Viernes'>Viernes</label>
+                </div>
+                <div className='row isDisabled' id='dayViernes'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Sábado' type='checkbox' data-target='#daySábado' />
+                  <label htmlFor='option_Sábado'>Sábado</label>
+                </div>
+                <div className='row isDisabled' id='daySábado'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-xs-4 mb-20 mb-20'>
+                <div className='checkbox'>
+                  <input id='option_Domingo' type='checkbox' data-target='#dayDomingo' />
+                  <label htmlFor='option_Domingo'>Domingo</label>
+                </div>
+                <div className='row isDisabled' id='dayDomingo'>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Inicial</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time start' disabled />
+                    </div>
+                  </div>
+                  <div className='col-xs-6 form-group'>
+                    <label className='required' htmlFor='#'>Horario Final</label>
+                    <div className='input-group'>
+                      <div className='input-group__add'>
+                        <span className='fa fa-clock-o' />
+                      </div>
+                      <input type='text' className='form-control time end' disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
           <div className='col-xs-12'>
