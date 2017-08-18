@@ -23,8 +23,11 @@ module.exports = {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        exclude: '/node_modules/',
-        use: 'babel-loader'
+        include: [
+          path.resolve(__dirname, "src"), '/node_modules\/antd/'
+        ],
+        // exclude: '/node_modules/',
+        loader: 'babel-loader',
       },
       {
         test: /\.json$/,
@@ -32,13 +35,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: { modules: true }
-          }
-        ]
+        use: [{
+          loader: "style-loader" // creates style nodes from JS strings
+        }, {
+          loader: "css-loader" // translates CSS into CommonJS
+        }]
       }
     ]
   },

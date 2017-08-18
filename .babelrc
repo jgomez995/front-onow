@@ -1,10 +1,12 @@
 {
 	"presets": [
 		["env", { "modules": false }],
-		"react"
+		"react",
+		"es2015"
 	],
 	"plugins": [
 		"react-hot-loader/babel",
+		["import", { "libraryName": "antd", "libraryDirectory": "lib", "style": "css" }],
 		"transform-object-rest-spread"
 	]
 }

@@ -3,7 +3,8 @@ import Layout from './layout'
 import axios from 'axios'
 import { connect } from 'react-redux'
 import DropzoneComponent from 'react-dropzone-component'
-import ReactDOMServer from 'react-dom/server'
+import { TimePicker, notification, Spin } from 'antd'
+import moment from 'moment'
 const API_URL = 'http://localhost:8080/admin'
 
 var componentConfig = {
@@ -14,26 +15,20 @@ var componentConfig = {
 }
 var djsConfig = {
   autoProcessQueue: false,
-  addRemoveLinks: true,
-  // previewTemplate: ReactDOMServer.renderToStaticMarkup(
-  //   <div className='gallery__item' id='gallery__item'>
-  //     <div className='dz-details'>
-  //       <div className='dz-filename'><span data-dz-name='true' /></div>
-  //       <img className='gallery__item-img' data-dz-thumbnail='true' />
-  //     </div>
-  //     <div className='dz-progress'><span className='dz-upload' data-dz-uploadprogress='true' /></div>
-  //     <div className='dz-success-mark'><span>✔</span></div>
-  //     <div className='dz-error-mark'><span>✘</span></div>
-  //     <div className='dz-error-message'><span data-dz-errormessage='true' /></div>
-  //     <button className='btn btn-trash' data-dz-remove><i className='fa fa-trash fa-fw' /></button>
-  //   </div>
-  // )
+  addRemoveLinks: true
 }
-
+const openNotificationWithIcon = (type, msg) => {
+  notification[type]({
+    message: type.toUpperCase(),
+    description: msg
+  })
+}
 class CrearShow extends React.Component {
   constructor(props) {
     super(props)
+    console.log(this.props)
     this.state = {
+      loading: false,
       hotel: this.props.route.match.params.hotel,
       imgBack: '/images/no-image.png',
       shows: [],
@@ -42,12 +37,56 @@ class CrearShow extends React.Component {
       show: '',
       desc_en: '',
       desc_es: '',
-      files: []
+      files: [],
+      calendar: {
+        Domingo: { dia: 'Domingo', disabled: true, num: 0, inicio: null, final: null },
+        Lunes: { dia: 'Lunes', disabled: true, num: 1, inicio: null, final: null },
+        Martes: { dia: 'Martes', disabled: true, num: 2, inicio: null, final: null },
+        Miercoles: { dia: 'Miercoles', disabled: true, num: 3, inicio: null, final: null },
+        Jueves: { dia: 'Jueves', disabled: true, num: 4, inicio: null, final: null },
+        Viernes: { dia: 'Viernes', disabled: true, num: 5, inicio: null, final: null },
+        Sábado: { dia: 'Sábado', disabled: true, num: 6, inicio: null, final: null }
+      }
     }
     this.handleBackgroundChange = this.handleBackgroundChange.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
     this.handleFileUpload = this.handleFileUpload.bind(this)
+    this.diaActive = this.diaActive.bind(this)
+    this.setInitialTime = this.setInitialTime.bind(this)
+    this.setFinalTime = this.setFinalTime.bind(this)
     this.formSubmit = this.formSubmit.bind(this)
+  }
+  diaActive(d, i) {
+    this.setState((prevState, props) => {
+      let { calendar } = prevState
+      let dia = { dia: d.dia, disabled: !d.disabled, num: d.num, inicio: d.inicio, final: d.final }
+      let newCalendar = { ...calendar, [d.dia]: dia }
+      calendar = newCalendar
+      console.log(newCalendar)
+      return { ...prevState, calendar }
+    })
+  }
+  setInitialTime(d, t, m) {
+    console.log(m)
+    // let dia = { dia: d.dia, disabled: !d.disabled, num: d.num, inicio: d.disabled ? d.inicio : null, final: d.disabled ? d.final : null }
+    this.setState((prevState, props) => {
+      let { calendar } = prevState
+      let dia = { dia: d.dia, disabled: d.disabled, num: d.num, inicio: t, final: d.final }
+      let newCalendar = { ...calendar, [d.dia]: dia }
+      calendar = newCalendar
+      console.log(newCalendar)
+      return { ...prevState, calendar }
+    })
+  }
+  setFinalTime(d, t) {
+    this.setState((prevState, props) => {
+      let { calendar } = prevState
+      let dia = { dia: d.dia, disabled: d.disabled, num: d.num, inicio: d.inicio, final: t }
+      let newCalendar = { ...calendar, [d.dia]: dia }
+      calendar = newCalendar
+      console.log(newCalendar)
+      return { ...prevState, calendar }
+    })
   }
   componentWillMount() {
     let getLocaciones = () => axios.get(`${API_URL}/locaciones`)
@@ -75,7 +114,7 @@ class CrearShow extends React.Component {
       this.setState({
         portada: file,
         imgBack: reader.result
-      });
+      })
     }
     reader.readAsDataURL(file)
   }
@@ -94,29 +133,52 @@ class CrearShow extends React.Component {
   }
   formSubmit(e) {
     e.preventDefault()
+    this.setState({ loading: true })
+    let _this = this
     let form = new FormData()
-    let files = this.state.files
+    const { files, calendar } = this.state
     files.forEach((v, i) => {
       form.append(`show-${i}`, v, v.name)
+    })
+    Object.values(calendar).forEach((v, i) => {
+      if (!v.disabled) {
+        form.append('dias[]', v.num)
+        form.append('inicio[]', v.inicio)
+        form.append('fin[]', v.final)
+      }
     })
     form.append('locacion', this.state.locacion)
     form.append('show', this.state.show)
     form.append('desc_es', this.state.desc_es)
     form.append('desc_en', this.state.desc_en)
-    form.append('portada', this.state.portada, this.state.portada.name)
+    if (this.state.portada) {
+      form.append('portada', this.state.portada, this.state.portada.name)
+    } else {
+      openNotificationWithIcon('error', 'La imagen portada Es Obligatorio')
+      _this.setState({ loading: false })
+      return false
+    }
 
     axios.post(`${API_URL}/newshow`, form, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        // 'Content-Type': 'multipart/form-data',
+        'X-Auth': this.props.session.user.token
       }
     })
       .then(function (e) {
         console.log(e)
+        if (e.data.error) {
+          openNotificationWithIcon('error', e.data.message)
+        } else {
+          openNotificationWithIcon('success', e.data.success)
+        }
+        _this.setState({ loading: false })
       })
       .catch(function (e) {
         console.log(e)
+        openNotificationWithIcon('error', e.message)
+        _this.setState({ loading: false })
       })
-    console.log(this.state)
   }
   handleFileAdded(file) {
     let files = this.state.files
@@ -126,291 +188,131 @@ class CrearShow extends React.Component {
   component() {
     let eventHandlers = { addedfile: this.handleFileAdded.bind(this) }
     return (
-      <article className='main__body'>
-        <form onSubmit={this.formSubmit}>
-          <div className='row'>
-            <div className='col-xs-12'>
-              <h5 className='title'>Nuevo Show</h5>
-              <div className='row'>
-                <div className='col-xs-2'>
-                  <div className='upload_file'>
-                    <div className='upload_file__wrap'>
-                      <img className='upload_file-image' src={this.state.imgBack} alt='' />
-                      <div className='upload_file__options'>
-                        <label htmlFor='filenew' className='btn btn-success'>
-                          <input onChange={this.handleBackgroundChange} id='filenew' type='file' className='gallery__file' />
-                          <i className='fa fa-plus fa-fw' />
-                        </label>
-                      </div>
-                    </div>
-                    <div className='upload_file__label'><small>Imagen Portada</small></div>
-                  </div>
-                </div>
-                <div className='col-xs-10'>
-                  <div className='row'>
-                    <div className='col-xs-4'>
-                      <div className='form-group'>
-                        <label className='required' htmlFor='#'>Nombre del Show:</label>
-                        <select onChange={this.handleInputChange} name='show' id='' value={this.state.show} className='form-control' required>
-                          <option value='' disabled hidden>Seleccionar...</option>
-                          {
-                            this.state.shows.map(a => <option value={a.id} key={a.id}>{a.actividad}</option>)
-                          }
-                        </select>
-                      </div>
-                    </div>
-                    <div className='col-xs-4'>
-                      <div className='form-group'>
-                        <label className='required' htmlFor='#'>Locación:</label>
-                        <select onChange={this.handleInputChange} name='locacion' value={this.state.locacion} id='' className='form-control' required>
-                          <option value='' disabled selected hidden>Seleccionar...</option>
-                          {
-                            this.state.locaciones.map(l => <option value={l.id} key={l.id}>{l.locacion}</option>)
-                          }
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className='row'>
-                <div className='col-xs-12'>
-                  <br />
-                  <div className='form-group'>
-                    <label htmlFor='desc_es'>Descripción Español:</label>
-                    <textarea name='desc_es' onChange={this.handleInputChange} value={this.state.desc_es} id='desc_es' cols='30' rows='10' className='editor' />
-                  </div>
-                </div>
-              </div>
-              <div className='row'>
-                <div className='col-xs-12'>
-                  <br />
-                  <div className='form-group'>
-                    <label htmlFor='desc_en'>Descripción Inglés:</label>
-                    <textarea name='desc_en' onChange={this.handleInputChange} value={this.state.desc_en} id='desc_en' cols='30' rows='10' className='editor' />
-                  </div>
-                </div>
-              </div>
+      <Spin spinning={this.state.loading} size='large'>
+        <article className='main__body'>
+          <form onSubmit={this.formSubmit}>
+            <div className='row'>
               <div className='col-xs-12'>
-                <h5 className='title'>Galería de Fotos</h5>
+                <h5 className='title'>Nuevo Show</h5>
+                <div className='row'>
+                  <div className='col-xs-2'>
+                    <div className='upload_file'>
+                      <div className='upload_file__wrap'>
+                        <img className='upload_file-image' src={this.state.imgBack} alt='' />
+                        <div className='upload_file__options'>
+                          <label htmlFor='filenew' className='btn btn-success'>
+                            <input onChange={this.handleBackgroundChange} id='filenew' type='file' className='gallery__file' />
+                            <i className='fa fa-plus fa-fw' />
+                          </label>
+                        </div>
+                      </div>
+                      <div className='upload_file__label'><small>Imagen Portada</small></div>
+                    </div>
+                  </div>
+                  <div className='col-xs-10'>
+                    <div className='row'>
+                      <div className='col-xs-4'>
+                        <div className='form-group'>
+                          <label className='required' htmlFor='#'>Nombre del Show:</label>
+                          <select onChange={this.handleInputChange} name='show' id='' value={this.state.show} className='form-control' required>
+                            <option value='' disabled hidden>Seleccionar...</option>
+                            {
+                              this.state.shows.map(a => <option value={a.id} key={a.id}>{a.actividad}</option>)
+                            }
+                          </select>
+                        </div>
+                      </div>
+                      <div className='col-xs-4'>
+                        <div className='form-group'>
+                          <label className='required' htmlFor='#'>Locación:</label>
+                          <select onChange={this.handleInputChange} name='locacion' value={this.state.locacion} id='' className='form-control' required>
+                            <option value='' disabled selected hidden>Seleccionar...</option>
+                            {
+                              this.state.locaciones.map(l => <option value={l.id} key={l.id}>{l.locacion}</option>)
+                            }
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className='row'>
                   <div className='col-xs-12'>
-                    <div className='gallery'>
-                      <div className='gallery-wrap'>
-                        <DropzoneComponent config={componentConfig} djsConfig={djsConfig} eventHandlers={eventHandlers} />
-                        <div className='clearfix' />
+                    <br />
+                    <div className='form-group'>
+                      <label htmlFor='desc_es'>Descripción Español:</label>
+                      <textarea name='desc_es' onChange={this.handleInputChange} value={this.state.desc_es} id='desc_es' cols='30' rows='10' className='editor' />
+                    </div>
+                  </div>
+                </div>
+                <div className='row'>
+                  <div className='col-xs-12'>
+                    <br />
+                    <div className='form-group'>
+                      <label htmlFor='desc_en'>Descripción Inglés:</label>
+                      <textarea name='desc_en' onChange={this.handleInputChange} value={this.state.desc_en} id='desc_en' cols='30' rows='10' className='editor' />
+                    </div>
+                  </div>
+                </div>
+                <div className='col-xs-12'>
+                  <h5 className='title'>Galería de Fotos</h5>
+                  <div className='row'>
+                    <div className='col-xs-12'>
+                      <div className='gallery'>
+                        <div className='gallery-wrap'>
+                          <DropzoneComponent config={componentConfig} djsConfig={djsConfig} eventHandlers={eventHandlers} />
+                          <div className='clearfix' />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className='col-xs-12'>
-            <h5 className='title'>Dias Activos</h5>
-            <div className='row activeDays'>
-              <div className='col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Lunes' type='checkbox' data-target='#dayLunes' />
-                  <label htmlFor='option_Lunes'>Lunes</label>
-                </div>
-                <div className='row isDisabled' id='dayLunes'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
+            <div className='col-xs-12'>
+              <h5 className='title'>Dias Activos</h5>
+              <div className='row activeDays'>
+                {
+                  Object.values(this.state.calendar).map((d, i) => (
+                    <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20' key={`daysKey_${d.num}`}>
+                      <div className='checkbox'>
+                        <input id={`option_${i}`} type='checkbox' value={d.disabled} onChange={() => this.diaActive(d, i)} />
+                        <label htmlFor={`option_${i}`}>{d.dia}</label>
                       </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
+                      <div className={(d.disabled) ? 'row isDisabled' : 'row'} id={`day${i}`}>
+                        <div className='col-xs-6 form-group'>
+                          <label className='required' htmlFor='#'>Horario Inicial</label>
+                          <div className='input-group'>
+                            <TimePicker defaultValue={moment()} size='large' disabled={d.disabled} onChange={(moment, time) => this.setInitialTime(d, time, moment)} />
+                          </div>
+                        </div>
+                        <div className='col-xs-6 form-group'>
+                          <label className='required' htmlFor='#'>Horario Final</label>
+                          <div className='input-group'>
+                            <TimePicker defaultValue={moment()} size='large' disabled={d.disabled} onChange={(moment, time) => this.setFinalTime(d, time)} />
+                          </div>
+                        </div>
                       </div>
-                      <input type='text' className='form-control time end' disabled />
                     </div>
-                  </div>
-                </div>
+                  ))
+                }
               </div>
-
-              <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Martes' type='checkbox' data-target='#dayMartes' />
-                  <label htmlFor='option_Martes'>Martes</label>
-                </div>
-                <div className='row isDisabled' id='dayMartes'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time end' disabled />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className='col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Miércoles' type='checkbox' data-target='#dayMiércoles' />
-                  <label htmlFor='option_Miércoles'>Miércoles</label>
-                </div>
-                <div className='row isDisabled' id='dayMiércoles'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time end' disabled />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Jueves' type='checkbox' data-target='#dayJueves' />
-                  <label htmlFor='option_Jueves'>Jueves</label>
-                </div>
-                <div className='row isDisabled' id='dayJueves'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time end' disabled />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className='col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Viernes' type='checkbox' data-target='#dayViernes' />
-                  <label htmlFor='option_Viernes'>Viernes</label>
-                </div>
-                <div className='row isDisabled' id='dayViernes'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time end' disabled />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className='col-xs-offset-1 col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Sábado' type='checkbox' data-target='#daySábado' />
-                  <label htmlFor='option_Sábado'>Sábado</label>
-                </div>
-                <div className='row isDisabled' id='daySábado'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time end' disabled />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className='col-xs-4 mb-20 mb-20'>
-                <div className='checkbox'>
-                  <input id='option_Domingo' type='checkbox' data-target='#dayDomingo' />
-                  <label htmlFor='option_Domingo'>Domingo</label>
-                </div>
-                <div className='row isDisabled' id='dayDomingo'>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Inicial</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time start' disabled />
-                    </div>
-                  </div>
-                  <div className='col-xs-6 form-group'>
-                    <label className='required' htmlFor='#'>Horario Final</label>
-                    <div className='input-group'>
-                      <div className='input-group__add'>
-                        <span className='fa fa-clock-o' />
-                      </div>
-                      <input type='text' className='form-control time end' disabled />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </div>
-          </div>
-          <div className='col-xs-12'>
-            <div className='center-buttons'>
-              <input type='submit' value='Guardar' className='btn btn-success btn-lg' onClick={() => console.log('enviar')} />
-              <button className='btn btn-cancel btn-lg'>Cancelar</button>
+            <div className='col-xs-12'>
+              <div className='center-buttons'>
+                <input type='submit' value='Guardar' className='btn btn-success btn-lg' onClick={() => console.log('enviar')} />
+                <button className='btn btn-cancel btn-lg'>Cancelar</button>
+              </div>
             </div>
-          </div>
-        </form>
-      </article>
+          </form>
+        </article>
+      </Spin>
     )
   }
   render() {
+    // if (this.state.loading) {
+    //   return <Layout component={<p>cargando</p>} />
+    // }
     return (
       <Layout component={this.component()} />
     )
