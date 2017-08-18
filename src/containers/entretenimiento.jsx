@@ -3,6 +3,7 @@ import Layout from './layout'
 import axios from 'axios'
 import { connect } from 'react-redux'
 import { Tabs, TabLink, TabContent } from 'react-tabs-redux'
+import { Modal, Input } from 'antd'
 
 const API_URL = 'http://localhost:8080/admin'
 
@@ -10,7 +11,8 @@ class Entretenimiento extends React.Component {
   constructor (props) {
     super(props)
     console.log(this.props.route)
-    this.state = { actividades: [], locaciones: [], shows: [] }
+    this.showModal = this.showModal.bind(this)
+    this.state = { actividades: [], locaciones: [], shows: [], actividadesModal: false, locacionModal: false, showModal: false }
   }
   componentWillMount () {
     let getActividades = () => axios.get(`${API_URL}/hoteles/${this.props.route.match.params.hotel}/1`)
@@ -28,13 +30,18 @@ class Entretenimiento extends React.Component {
         }
       })
   }
+  showModal (modal) {
+    this.setState({
+      [modal]: true
+    })
+  }
   component () {
     return (
       <article className='main__body'>
         <div className='row'>
           <div className='col-xs-12'>
             <div className='return-button'>
-              <a href='#' onClick={this.props.route.history.goBack} className='btn btn-return'><span className='fa fa-angle-left fa-fw' /></a>
+              <a onClick={this.props.route.history.goBack} className='btn btn-return'><span className='fa fa-angle-left fa-fw' /></a>
               <h4>Hoteles</h4>
             </div>
           </div>
@@ -85,7 +92,7 @@ class Entretenimiento extends React.Component {
                   <div id='categorias'>
                     <h5 className='title'>Entretenimiento</h5>
                     <div className='add-promotion pull-right'>
-                      <a href='#add-category' rel='modal:open' className='btn btn-success open-popup-link'><span className='fa fa-plus fa-fw' /></a>
+                      <a onClick={() => this.showModal('actividadesModal')} rel='modal:open' className='btn btn-success open-popup-link'><span className='fa fa-plus fa-fw' /></a>
                     </div>
                     <table className='table tables' data-page-length='7'>
                       <thead>
@@ -111,7 +118,7 @@ class Entretenimiento extends React.Component {
                   <div id='locaciones'>
                     <h5 className='title'>Entretenimiento</h5>
                     <div className='add-promotion pull-right'>
-                      <a href='#add-location' rel='modal:open' className='btn btn-success open-popup-link'><span className='fa fa-plus fa-fw' /></a>
+                      <a onClick={() => this.showModal('locacionModal')} rel='modal:open' className='btn btn-success open-popup-link'><span className='fa fa-plus fa-fw' /></a>
                     </div>
                     <table className='table tables' data-page-length='7'>
                       <thead>
@@ -143,6 +150,22 @@ class Entretenimiento extends React.Component {
             </div>
           </div>
         </div>
+        <Modal
+          title='Agregar Actividad'
+          visible={this.state.actividadesModal}
+          onOk={() => console.log('ok')}
+          onCancel={() => this.setState({actividadesModal: false})}
+        >
+          <Input size='large' placeholder='Actividad' />
+        </Modal>
+        <Modal
+          title='Agregar Locación'
+          visible={this.state.locacionModal}
+          onOk={() => console.log('ok')}
+          onCancel={() => this.setState({locacionModal: false})}
+        >
+          <Input size='large' placeholder='Locacion' />
+        </Modal>
       </article>
     )
   }

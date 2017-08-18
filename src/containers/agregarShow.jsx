@@ -39,13 +39,13 @@ class CrearShow extends React.Component {
       desc_es: '',
       files: [],
       calendar: {
-        Domingo: { dia: 'Domingo', disabled: true, num: 0, inicio: null, final: null },
-        Lunes: { dia: 'Lunes', disabled: true, num: 1, inicio: null, final: null },
-        Martes: { dia: 'Martes', disabled: true, num: 2, inicio: null, final: null },
-        Miercoles: { dia: 'Miercoles', disabled: true, num: 3, inicio: null, final: null },
-        Jueves: { dia: 'Jueves', disabled: true, num: 4, inicio: null, final: null },
-        Viernes: { dia: 'Viernes', disabled: true, num: 5, inicio: null, final: null },
-        Sábado: { dia: 'Sábado', disabled: true, num: 6, inicio: null, final: null }
+        Domingo: { dia: 'Domingo', disabled: true, num: 0, inicio: '12:00', final: '13:00' },
+        Lunes: { dia: 'Lunes', disabled: true, num: 1, inicio: '12:00', final: '13:00' },
+        Martes: { dia: 'Martes', disabled: true, num: 2, inicio: '12:00', final: '13:00' },
+        Miercoles: { dia: 'Miercoles', disabled: true, num: 3, inicio: '12:00', final: '13:00' },
+        Jueves: { dia: 'Jueves', disabled: true, num: 4, inicio: '12:00', final: '13:00' },
+        Viernes: { dia: 'Viernes', disabled: true, num: 5, inicio: '12:00', final: '13:00' },
+        Sábado: { dia: 'Sábado', disabled: true, num: 6, inicio: '12:00', final: '13:00' }
       }
     }
     this.handleBackgroundChange = this.handleBackgroundChange.bind(this)
@@ -91,10 +91,11 @@ class CrearShow extends React.Component {
   componentWillMount() {
     let getLocaciones = () => axios.get(`${API_URL}/locaciones`)
     let getShows = () => axios.get(`${API_URL}/actividades`)
-
-    axios.all([getLocaciones(), getShows()])
-      .then(axios.spread((locaciones, shows) => {
-        this.setState({ locaciones: locaciones.data, shows: shows.data })
+    let getHoteles = () => axios.get(`${API_URL}/hoteles`, { headers: { 'X-Auth': this.props.session.user.token } })
+    axios.all([getLocaciones(), getShows(), getHoteles()])
+      .then(axios.spread((locaciones, shows, hoteles) => {
+        let hotel = hoteles.data.filter(e => e.clave === this.props.route.match.params.hotel)
+        this.setState({ locaciones: locaciones.data, shows: shows.data, hotelId: hotel[0].id })
         console.log(this.state)
       }))
       .catch(function (e) {
@@ -151,6 +152,7 @@ class CrearShow extends React.Component {
     form.append('show', this.state.show)
     form.append('desc_es', this.state.desc_es)
     form.append('desc_en', this.state.desc_en)
+    form.append('hotel_id', this.state.hotelId)
     if (this.state.portada) {
       form.append('portada', this.state.portada, this.state.portada.name)
     } else {
@@ -168,7 +170,7 @@ class CrearShow extends React.Component {
       .then(function (e) {
         console.log(e)
         if (e.data.error) {
-          openNotificationWithIcon('error', e.data.message)
+          openNotificationWithIcon('error', e.data.error)
         } else {
           openNotificationWithIcon('success', e.data.success)
         }
@@ -283,13 +285,13 @@ class CrearShow extends React.Component {
                         <div className='col-xs-6 form-group'>
                           <label className='required' htmlFor='#'>Horario Inicial</label>
                           <div className='input-group'>
-                            <TimePicker defaultValue={moment()} size='large' disabled={d.disabled} onChange={(moment, time) => this.setInitialTime(d, time, moment)} />
+                            <TimePicker defaultValue={moment(d.inicio, 'HH:mm')} format='HH:mm' size='large' disabled={d.disabled} onChange={(moment, time) => this.setInitialTime(d, time, moment)} />
                           </div>
                         </div>
                         <div className='col-xs-6 form-group'>
                           <label className='required' htmlFor='#'>Horario Final</label>
                           <div className='input-group'>
-                            <TimePicker defaultValue={moment()} size='large' disabled={d.disabled} onChange={(moment, time) => this.setFinalTime(d, time)} />
+                            <TimePicker defaultValue={moment(d.final, 'HH:mm')} format='HH:mm' size='large' disabled={d.disabled} onChange={(moment, time) => this.setFinalTime(d, time)} />
                           </div>
                         </div>
                       </div>
@@ -301,7 +303,7 @@ class CrearShow extends React.Component {
             <div className='col-xs-12'>
               <div className='center-buttons'>
                 <input type='submit' value='Guardar' className='btn btn-success btn-lg' onClick={() => console.log('enviar')} />
-                <button className='btn btn-cancel btn-lg'>Cancelar</button>
+                <a className='btn btn-cancel btn-lg' onClick={() => this.props.route.history.goBack()}>Regresar</a>
               </div>
             </div>
           </form>

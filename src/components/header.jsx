@@ -14,9 +14,9 @@ const Header = (props) => {
             <ul className='menuDropit'>
               <li>
                 <div className='avatar-profile'>
-                  <img src='/images/avatar/avatar.png' alt='profile' />
+                  <img src={props.session.img} alt='profile' />
                 </div>
-                <a href='#' className='name-profile'><span className='light'>Hola</span>,mi Nombre<i className='fa fa-caret-down' /></a>
+                <a href='#' className='name-profile'><span className='light'>Hola</span>, {props.session.nombre} {props.session.apellido} <i className='fa fa-caret-down' /></a>
                 <ul>
                   <li><a href='#'>Reportar Fallo</a></li>
                   <li><a href='#'>Administradores</a></li>
