@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import DropzoneComponent from 'react-dropzone-component'
 import { TimePicker, notification, Spin } from 'antd'
 import moment from 'moment'
+
 const API_URL = 'http://localhost:8080/admin'
 
 var componentConfig = {
@@ -42,7 +43,7 @@ class CrearShow extends React.Component {
         Domingo: { dia: 'Domingo', disabled: true, num: 0, inicio: '12:00', final: '13:00' },
         Lunes: { dia: 'Lunes', disabled: true, num: 1, inicio: '12:00', final: '13:00' },
         Martes: { dia: 'Martes', disabled: true, num: 2, inicio: '12:00', final: '13:00' },
-        Miercoles: { dia: 'Miercoles', disabled: true, num: 3, inicio: '12:00', final: '13:00' },
+        Miércoles: { dia: 'Miércoles', disabled: true, num: 3, inicio: '12:00', final: '13:00' },
         Jueves: { dia: 'Jueves', disabled: true, num: 4, inicio: '12:00', final: '13:00' },
         Viernes: { dia: 'Viernes', disabled: true, num: 5, inicio: '12:00', final: '13:00' },
         Sábado: { dia: 'Sábado', disabled: true, num: 6, inicio: '12:00', final: '13:00' }
@@ -89,15 +90,22 @@ class CrearShow extends React.Component {
     })
   }
   componentWillMount() {
-    let getLocaciones = () => axios.get(`${API_URL}/locaciones`)
+    const _this = this
     let getShows = () => axios.get(`${API_URL}/actividades`)
     let getHoteles = () => axios.get(`${API_URL}/hoteles`, { headers: { 'X-Auth': this.props.session.user.token } })
-    axios.all([getLocaciones(), getShows(), getHoteles()])
-      .then(axios.spread((locaciones, shows, hoteles) => {
+    axios.all([getShows(), getHoteles()])
+      .then(axios.spread((shows, hoteles) => {
         let hotel = hoteles.data.filter(e => e.clave === this.props.route.match.params.hotel)
-        this.setState({ locaciones: locaciones.data, shows: shows.data, hotelId: hotel[0].id })
+        this.setState({ shows: shows.data, hotelId: hotel[0].id })
         console.log(this.state)
+        return hotel[0].id
       }))
+      .then(hotel => {
+        axios.get(`${API_URL}/locaciones/${hotel}`).then(locaciones => {
+          console.log(locaciones)
+          _this.setState({ locaciones: locaciones.data })
+        })
+      })
       .catch(function (e) {
         if (e.response.status === 404) {
           res.status(404).send('!Página no encontrada!')
@@ -106,10 +114,10 @@ class CrearShow extends React.Component {
   }
 
   handleBackgroundChange(e) {
-    e.preventDefault();
+    e.preventDefault()
 
-    let reader = new FileReader();
-    let file = e.target.files[0];
+    let reader = new FileReader()
+    let file = e.target.files[0]
 
     reader.onloadend = () => {
       this.setState({
@@ -137,9 +145,36 @@ class CrearShow extends React.Component {
     this.setState({ loading: true })
     let _this = this
     let form = new FormData()
+
+    let shows = this.state.shows
+    let locaciones = this.state.locaciones
+    let carpeta = shows.find(s => s.id == this.state.show)
+    let lugar = locaciones.find(l => l.id == this.state.locacion)
+    form.append('carpeta', carpeta.actividad)
+    form.append('lugar', lugar.locacion)
+    form.append('hotel', this.state.hotel)
+    form.append('locacion', this.state.locacion)
+    form.append('show', this.state.show)
+    form.append('desc_es', this.state.desc_es)
+    form.append('desc_en', this.state.desc_en)
+    form.append('hotel_id', this.state.hotelId)
+    for (var value of form.values()) {
+      console.log(value)
+    }
+    for (var key of form.keys()) {
+      console.log(key)
+    }
+
+    if (this.state.portada) {
+      form.append('portada', this.state.portada, this.state.portada.name)
+    } else {
+      openNotificationWithIcon('error', 'La imagen portada Es Obligatorio')
+      _this.setState({ loading: false })
+      return false
+    }
     const { files, calendar } = this.state
     files.forEach((v, i) => {
-      form.append(`show-${i}`, v, v.name)
+      form.append(`galeria`, v)
     })
     Object.values(calendar).forEach((v, i) => {
       if (!v.disabled) {
@@ -148,22 +183,9 @@ class CrearShow extends React.Component {
         form.append('fin[]', v.final)
       }
     })
-    form.append('locacion', this.state.locacion)
-    form.append('show', this.state.show)
-    form.append('desc_es', this.state.desc_es)
-    form.append('desc_en', this.state.desc_en)
-    form.append('hotel_id', this.state.hotelId)
-    if (this.state.portada) {
-      form.append('portada', this.state.portada, this.state.portada.name)
-    } else {
-      openNotificationWithIcon('error', 'La imagen portada Es Obligatorio')
-      _this.setState({ loading: false })
-      return false
-    }
-
     axios.post(`${API_URL}/newshow`, form, {
       headers: {
-        // 'Content-Type': 'multipart/form-data',
+        // 'Content-Type': 'application/json',
         'X-Auth': this.props.session.user.token
       }
     })

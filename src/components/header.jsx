@@ -1,6 +1,19 @@
 import React from 'react'
+import { Menu, Dropdown, Icon } from 'antd';
+
+
 
 const Header = (props) => {
+  const menu = (
+    <Menu>
+      <Menu.Item key="0">
+        <a href="http://www.alipay.com/">Administradores</a>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <a href="#" onClick={() => props.logout()}>Salir</a>
+      </Menu.Item>
+    </Menu>
+  )
   return (
     <header className='header'>
       <div className='header__brand' />
@@ -11,19 +24,16 @@ const Header = (props) => {
             <h3><small>Sistema Administrador de Recursos</small></h3>
           </div>
           <div className='col-xs-6 header__nav--menu'>
-            <ul className='menuDropit'>
-              <li>
-                <div className='avatar-profile'>
-                  <img src={props.session.img} alt='profile' />
-                </div>
-                <a href='#' className='name-profile'><span className='light'>Hola</span>, {props.session.nombre} {props.session.apellido} <i className='fa fa-caret-down' /></a>
-                <ul>
-                  <li><a href='#'>Reportar Fallo</a></li>
-                  <li><a href='#'>Administradores</a></li>
-                  <li><a href='<?=base_url()?>logout'>Salir</a></li>
-                </ul>
-              </li>
-            </ul>
+            <div className='menuDropit'>
+              <div className='avatar-profile'>
+                <img src={props.session.img} alt='profile' />
+              </div>
+              <Dropdown overlay={menu} trigger={['click']}>
+                <a className="name-profile ant-dropdown-link" href="#">
+                  <span className='light'>Hola</span>, {props.session.nombre} {props.session.apellido} <Icon type="down" />
+                </a>
+              </Dropdown>
+            </div>
           </div>
           <div className='col-xs-12 header__nav--breadcrumb'>
             <div className='breadcrumb'>

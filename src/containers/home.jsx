@@ -2,18 +2,18 @@ import React from 'react'
 import Layout from './layout'
 import axios from 'axios'
 import { connect } from 'react-redux'
-
+import { Spin } from 'antd'
 const API_URL = 'http://localhost:8080/admin'
 
 class Home extends React.Component {
   constructor (props) {
     super(props)
-    this.state = { hoteles: [] }
+    this.state = { hoteles: [], loading: true }
   }
   componentWillMount () {
     axios.get(`${API_URL}/hoteles`, { headers: { 'X-Auth': this.props.session.user.token } })
       .then((res) => {
-        this.setState({ hoteles: res.data })
+        this.setState({ hoteles: res.data, loading:false })
       })
       .catch(e => console.log(e))
   }
@@ -23,6 +23,7 @@ class Home extends React.Component {
         <div className='row'>
           <div className='col-xs-12'>
             <h5 className='title'>Hoteles</h5>
+            <Spin spinning={this.state.loading} size='large'>
             <table className='table tables'>
               <thead>
                 <tr>
@@ -44,6 +45,7 @@ class Home extends React.Component {
                 ))}
               </tbody>
             </table>
+            </Spin>
           </div>
         </div>
       </article>

@@ -23,6 +23,9 @@ export const login = (email, password) => {
   }
 }
 
+export const logout = () => {
+  return {type: actionTypes.LOGOUT}
+}
 const loginSuccess = (user) => {
   return {type: actionTypes.LOGIN_SUCCESS, payload: user}
 }

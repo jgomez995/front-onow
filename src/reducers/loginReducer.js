@@ -8,6 +8,8 @@ export default function (state = { loggedIn: false, waiting: true }, action) {
       return { ...state, loggedIn: false, waiting: false, loginError: action.error }
     case types.PAGE_LOADED:
       return { ...state, waiting: false }
+    case types.LOGOUT:
+      return { ...state, loggedIn: false, user: null }
     default:
       return state
   }
