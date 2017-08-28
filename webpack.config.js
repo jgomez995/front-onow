@@ -1,6 +1,6 @@
 const webpack = require('webpack')
 const path = require('path')
-const endPath = path.resolve(__dirname, 'public')
+const endPath = path.resolve(__dirname, 'public/js')
 
 module.exports = {
   resolve: {
@@ -45,7 +45,13 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin()
+    new webpack.NamedModulesPlugin(),
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify('production')
+      }
+    }),
+    new webpack.optimize.UglifyJsPlugin()
   ],
   devtool: 'inline-source-map',
   devServer: {

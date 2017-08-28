@@ -1,16 +1,14 @@
 import React from 'react'
 import { Menu, Dropdown, Icon } from 'antd';
 
-
-
 const Header = (props) => {
   const menu = (
     <Menu>
-      <Menu.Item key="0">
-        <a href="http://www.alipay.com/">Administradores</a>
+      <Menu.Item key='0'>
+        <a href=''>Administradores</a>
       </Menu.Item>
-      <Menu.Item key="3">
-        <a href="#" onClick={() => props.logout()}>Salir</a>
+      <Menu.Item key='3'>
+        <a href='#' onClick={() => props.logout()}>Salir</a>
       </Menu.Item>
     </Menu>
   )
@@ -29,8 +27,8 @@ const Header = (props) => {
                 <img src={props.session.img} alt='profile' />
               </div>
               <Dropdown overlay={menu} trigger={['click']}>
-                <a className="name-profile ant-dropdown-link" href="#">
-                  <span className='light'>Hola</span>, {props.session.nombre} {props.session.apellido} <Icon type="down" />
+                <a className='name-profile ant-dropdown-link' href='#'>
+                  <span className='light'>Hola</span>, {props.session.nombre} {props.session.apellido} <Icon type='down' />
                 </a>
               </Dropdown>
             </div>

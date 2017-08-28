@@ -164,23 +164,25 @@ class editarShow extends React.Component {
     e.preventDefault()
     this.setState({ loading: true })
     let _this = this
-    let form = new FormData()
+    let form = {}
+    form.dias = []
+    form.inicio = []
+    form.fin = []
     const { calendar } = this.state
 
     Object.values(calendar).forEach((v, i) => {
       if (!v.disabled) {
-        form.append('dias[]', v.num)
-        form.append('inicio[]', v.inicio)
-        form.append('fin[]', v.final)
+        form.dias.push(v.num)
+        form.inicio.push(v.inicio)
+        form.fin.push(v.final)
       }
     })
-    form.append('show', this.state.id)
-    form.append('desc_es', this.state.desc_es)
-    form.append('desc_en', this.state.desc_en)
+    form.show = this.state.id
+    form.desc_es = this.state.desc_es
+    form.desc_en = this.state.desc_en
 
     axios.post(`${API_URL}/editar/show`, form, {
       headers: {
-        'Content-Type': 'application/json',
         'X-Auth': this.props.session.user.token
       }
     })

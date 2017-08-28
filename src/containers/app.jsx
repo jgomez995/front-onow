@@ -43,6 +43,7 @@ class App extends React.Component {
         )} />
         <Route exact path='/login' component={Login} />
         <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/home' component={Home} />
+        <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/entretenimiento' component={Home} />
         <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/entretenimiento/:hotel' component={Entretenimiento} />
         <MatchWhenAuthorized exact auth={this.props.session.loggedIn} path='/:hotel/editarShow/:actividadId' component={editarShow} />
         <MatchWhenAuthorized auth={this.props.session.loggedIn} path='/:hotel/agregarShow' component={CrearShow} />

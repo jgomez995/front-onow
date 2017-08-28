@@ -2,7 +2,7 @@
   "name": "onow_front",
   "version": "1.0.0",
   "description": "Frontend del backend Onow",
-  "main": "app.js",
+  "main": "/public/js/app.js",
   "scripts": {
     "build": "webpack --colors --progress",
     "serve": "webpack-dev-server --colors --progress",

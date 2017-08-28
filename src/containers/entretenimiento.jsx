@@ -3,7 +3,7 @@ import Layout from './layout'
 import axios from 'axios'
 import { connect } from 'react-redux'
 import { Tabs, TabLink, TabContent } from 'react-tabs-redux'
-import { Modal, Input, notification, Spin } from 'antd'
+import { Modal, Input, notification, Spin, Popconfirm, message } from 'antd'
 
 const API_URL = 'http://localhost:8080/admin'
 
@@ -21,6 +21,7 @@ class Entretenimiento extends React.Component {
     this.showModal = this.showModal.bind(this)
     this.submitLocacion = this.submitLocacion.bind(this)
     this.submitActividad = this.submitActividad.bind(this)
+    this.onDeleteActivity = this.onDeleteActivity.bind(this)
     this.state = { actividades: [], locaciones: [], shows: [], actividadesModal: false, locacionModal: false, showModal: false, loading: true }
   }
   componentWillMount() {
@@ -32,6 +33,7 @@ class Entretenimiento extends React.Component {
       .then(axios.spread((actividades, shows, hoteles) => {
         let hotel = hoteles.data.filter(e => e.clave === this.props.route.match.params.hotel)
         this.setState({ actividades: actividades.data, shows: shows.data, hotel: hotel[0].id })
+        console.log(hotel[0].id)
         return hotel[0].id
       }))
       .then(function (hotel) {
@@ -63,6 +65,19 @@ class Entretenimiento extends React.Component {
           res.status(404).send('!Página no encontrada!')
         }
       })
+  }
+  onDeleteActivity(id) {
+    let _this = this
+    axios.get(`${API_URL}/eliminar/show/${id}`, {
+      headers: {
+        'X-Auth': this.props.session.user.token
+      }
+    })
+    .then(function (r) {
+      console.log(id)
+      _this.update()
+      message.success(r.data.success)
+    })
   }
   showModal(modal) {
     this.setState({
@@ -140,7 +155,7 @@ class Entretenimiento extends React.Component {
                     <div className='add-promotion pull-right'>
                       <a href={`/${this.props.route.match.params.hotel}/agregarshow`} className='btn btn-success'><span className='fa fa-plus fa-fw' /></a>
                     </div>
-                   <div className='clearfix' />
+                    <div className='clearfix' />
                     <Spin spinning={this.state.loading} size='large'>
                       <table className='table tables' data-page-length='7'>
                         <thead>
@@ -159,7 +174,12 @@ class Entretenimiento extends React.Component {
                                 <td>{a.nombre}</td>
                                 <td>{a.lugar}</td>
                                 <td>{a.dias.map((dia, i) => i === a.dias.length - 1 ? `${dias[dia.dia]}` : `${dias[dia.dia]} - `)}</td>
-                                <td><a href={`/${this.props.route.match.params.hotel}/editarShow/${a.evento_id}`} rel='modal:open' className='btn btn-edit'><i className='fa fa-pencil fa-fw' /></a><a href='' className='btn btn-trash'><i className='fa fa-trash fa-fw' /></a></td>
+                                <td>
+                                  <a href={`/${this.props.route.match.params.hotel}/editarShow/${a.evento_id}`} className='btn btn-edit'><i className='fa fa-pencil fa-fw' /></a>
+                                  <Popconfirm title='¿Está seguro de eliminar la Actividad?' onConfirm={() => this.onDeleteActivity(a.evento_id)} onCancel={()=>console.log('no')} okText='Si' cancelText='No'>
+                                    <a href='' className='btn btn-trash'><i className='fa fa-trash fa-fw' /></a>
+                                  </Popconfirm>
+                                </td>
                               </tr>
                             ))
                           }
